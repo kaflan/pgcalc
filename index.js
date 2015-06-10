@@ -4,98 +4,126 @@ window.addEventListener('load', function load() {
   var body = document.querySelector('body');
   var buttonQuery;
   var inputQueryAll;
-  var divQuery;
   var divAllQuery;
   var clone;
-  var i;
-  var isValid;
-  var inputValOne;
-  var inputValTwo;
-  var inputValToNumOne;
-  var inputValToNumTwo;
   var text = '+';
-  var navSelector;
   var div = document.createElement('div');
   var input = document.createElement('input');
   var button = document.createElement('button');
-  var aside = document.createElement('aside');
   var docFrag = document.createDocumentFragment();
   var nav = document.createElement('nav');
-  var p = document.createElement('p');
-  p.innerHTML = 'Это не число';
+
   function createEL() {
-    body.appendChild(aside); //  беремо боді додаємо асайд.
-    aside.appendChild(div); // додаємо в айсід дів
-    divQuery = document.querySelector('div');
     docFrag.appendChild(input); //  додаємо пару фрагментів інпуту
-    div.appendChild(docFrag); //  в дів кладемо інпут
-    clone = div.cloneNode(true); // clone div  із інпутом
-    aside.appendChild(clone); // додаємо в айсід дів
-    divQuery.appendChild(nav);
+    body.appendChild(docFrag); //  в дів кладемо інпут
+    body.appendChild(div);
+    body.appendChild(nav);
+    clone = input.cloneNode(true); // clone div  із інпутом
+    body.appendChild(clone); // додаємо в айсід дів
+    clone = div.cloneNode(true);
+    body.appendChild(clone);
     nav.innerHTML = text;
     divAllQuery = document.querySelectorAll('div'); // all div to arr and toggle class
-    for (i = 0; i < divAllQuery.length; i++) {
-      divAllQuery[i].classList.add('error-message'); // err mess add to class
-      divAllQuery[i].classList.toggle('error-message');
-    }
-    aside.appendChild(button);
+    body.appendChild(button);
     buttonQuery = document.querySelector('button');
     buttonQuery.innerHTML = 'Посчитать';
   }
 
   createEL();
   //  після создння елементи найдуться.
-  divQuery = document.querySelector('div');
   divAllQuery = document.querySelectorAll('div');// all div to arr and toggle class
   inputQueryAll = document.querySelectorAll('input');
   buttonQuery = document.querySelector('button');
   clone = div.cloneNode(true);
-  function getInputValues() {
-    inputValOne = (inputQueryAll[0].value);
-    inputValToNumOne = +inputValOne;
-    inputValTwo = (inputQueryAll[1].value);
-    inputValToNumTwo = +inputValTwo;
+
+  function getInputValue1() {
+    return inputQueryAll[0].value;
   } // береремо із інпута данні перетворюємо на намбер
-  function result() {
-    return inputValToNumOne + inputValToNumTwo;
+  function getInputValue2() {
+    return inputQueryAll[1].value;
   }
 
-  function valid() {
-    getInputValues();
-    navSelector = document.querySelector('nav');
-    isValid = true;
-    if (divAllQuery[0].parentNode.contains(p) && divAllQuery[1].parentNode.contains(p)) {
-      p.innerHTML = '';
+  function removeClass1() {
+    return divAllQuery[0].classList.remove('error-message');
+  }
+
+  function removeClass2() {
+    return divAllQuery[1].classList.remove('error-message');
+  }
+
+  function valid1() {
+    var num = getInputValue1();
+    if (num.trim().substring(0, 2) === '0x' || num.trim() === '') {
+      return false;
     }
-    if (( isNaN(inputValToNumOne))) {
+    num = Number(num);
+    if (isNaN(num) || !isFinite(num) ) {
+      return false;
+    }
+    removeClass1();
+    divAllQuery[0].innerHTML = '';
+    return num;
+  }
+
+  function valid2() {
+    var num = getInputValue2();
+    if (num.trim().substring(0, 2) === '0x' || num.trim() === '') {
+      return false;
+    }
+    num = Number(num);
+    if (isNaN(num) || !isFinite(num) ) {
+      return false;
+    }
+    removeClass2();
+    divAllQuery[1].innerHTML = '';
+    return num;
+  }
+
+  function result() {
+    return valid1() + valid2();
+  }
+
+  function validErr1() {
+    if (!valid1()) {
       divAllQuery[0].classList.add('error-message');
-      divAllQuery[0].appendChild(p);
-      divAllQuery[0].insertBefore(p, navSelector);
+      divAllQuery[0].innerHTML = 'Это не число';
+      return false;
     }
-    if (isNaN(inputValToNumTwo)) {
+    return true;
+  }
+
+  function validErr2() {
+    if (!valid2()) {
       divAllQuery[1].classList.add('error-message');
-      divAllQuery[1].appendChild(p);
-      divAllQuery[1].insertBefore(p, navSelector);
+      divAllQuery[1].innerHTML = 'Это не число';
+      return false;
     }
-    if (!isValid) {
-      return;
-    }
-    divAllQuery[0].classList.remove('error-message');
-    divAllQuery[1].classList.remove('error-message');
+    divAllQuery[1].innerHTML = '';
+    return true;
+  }
+
+  function res() {
     div = document.createElement('div');
+    validErr1();
+    validErr2();
     body.appendChild(div);
     divAllQuery = document.querySelectorAll('div');
+    if (divAllQuery[1].classList.contains('error-message') || divAllQuery[0].classList.contains('error-message')) {
+      divAllQuery[2].parentNode.removeChild(divAllQuery[2]);
+      return false;
+    }
     divAllQuery[2].id = 'result';
-    divAllQuery[2].innerHTML = 'Результат: ' + result();
+    divAllQuery[2].innerHTML = result();
+    return true;
   }
 
   inputQueryAll[0].addEventListener('keyup', function firstInput(event) {
     if (event.keyCode !== 13) return;
-    valid();
+    validErr1();
   });
   inputQueryAll[1].addEventListener('keyup', function secondInput(event) {
     if (event.keyCode !== 13) return;
-    valid();
+    validErr2();
   });
-  buttonQuery.addEventListener('click', valid);
+  buttonQuery.addEventListener('click', res);
 });
